@@ -1,0 +1,3 @@
+/database-volume/*
+.env
+/.vscode

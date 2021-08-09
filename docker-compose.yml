@@ -1,0 +1,62 @@
+version: "3.9"
+
+services:
+  geo:
+    build:
+      context: ./geo
+      dockerfile: Dockerfile
+    depends_on:
+      - geo_db
+      - redis
+    command: sh ./entrypoint.sh
+    container_name: geo
+    environment:
+      - PRODUCTION=False
+    env_file:
+      - ".env"
+    expose:
+      - 8000
+    volumes:
+      - ./geo:/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/mediafiles
+
+  geo_db:
+    image: kartoza/postgis:12.1
+    volumes:
+      - ./database-volume:/var/lib/postgresql/data
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    container_name: geo_db
+
+  nginx:
+    restart: always
+    container_name: geo_nginx_server
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    volumes:
+      - static_volume:/usr/src/app/staticfiles
+      - media_volume:/usr/src/app/mediafiles
+    ports:
+      - 80:80
+      - 443:443
+    env_file:
+      - ".env"
+    depends_on:
+      - geo
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "5672:5672"
+
+volumes:
+  static_volume:
+  media_volume:
+  nginx-letsencrypt:
