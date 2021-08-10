@@ -41,3 +41,7 @@ Requirements:
 - Docker
 - Docker Compose
 - Python
+
+# API
+
+ You can verify the API running in a EC2 instace here: http://18.228.199.200/
